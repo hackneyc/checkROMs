@@ -91,6 +91,11 @@ then
 	if [[ $(find "$HOME/.lastROMCheck" -mtime +$days -print) ]]
 	then
 		md5sum -c $sumFile
+		if [ $? != 0 ]
+		then
+			echo "Checksum failed!"
+			read -n 1 -r -s -p $'Press enter to continue...\n'
+		fi
 		touch $HOME/.lastROMCheck
 	fi
 fi
