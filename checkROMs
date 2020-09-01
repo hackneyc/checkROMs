@@ -1,0 +1,97 @@
+#!/bin/bash
+
+create=0
+check=0
+fileSpec=""
+sumFile=""
+path=""
+days="30"
+
+# Create the last check file if it does not exist
+if [ ! -f $HOME/.lastROMCheck ]
+then
+    touch -t 200001010000 $HOME/.lastROMCheck
+fi
+
+# Process command line parameters
+while [ "$1" != "" ]
+do
+	arg=$1
+
+	case $arg in
+		-n|--now)
+			# Create the last check file in the past
+	    		touch -t 200001010000 $HOME/.lastROMCheck
+			shift
+			;;
+		-g|--generate)
+			shift
+			fileSpec="$1"
+			shift
+			create=1
+			;;
+		-c|--check)
+			shift
+			sumFile="$1"
+			shift
+			check=1
+			;;
+		-p|--path)
+			shift
+			path="$1"
+			shift
+			;;
+		-d|--days)
+			shift
+			days="$1"
+			shift
+			;;
+		-h|--help)
+			echo "Usage: checkROMs [OPTIONS]"
+			echo
+			echo "OPTIONS"
+			echo " -h|--help                         :    Display this output."
+			echo " -n|--now                          :    Check ROM's now."
+			echo " -c|--check FILENAME               :    Check checksums from the specified checksum file."
+			echo " -g|--generate FILESPEC[,FILESPEC] :    Create ROM checksums using the specified FILESPEC."
+			echo " -p|--path PATH                    :    Base path used when generating checksums."
+			echo " -d|--days NUMDAYS                 :    Number of days since last check."
+			echo
+			echo "Usage Examples"
+			echo "Generate a checksum file for ZIP files located under /home/pi."
+			echo " $0 -p /home/pi -g *.zip > checksum.md5"
+			echo
+			echo "Check generated checksum file. If a check has been performed"
+			echo "within the default 30 days or specified number of days, no check is performed."
+			echo " $0 -c checksum.md5"
+			echo
+			echo "Check generated checksum file only is 10 days has passed since it was last checked."
+			echo " $0 -c checksum.md5 -d 10"
+			echo
+			echo "Force check of generated checksum file."
+			echo " $0 -c checksum.md5 -n"
+			echo
+			exit
+			;;
+		*)
+			echo "$arg   :    Unknown parameter."
+			exit
+			;;
+	esac
+done
+
+if [ "$create" == "1" ]
+then
+	for spec in $(echo $fileSpec | sed "s/,/ /g")
+	do
+		find $path -name "$spec" -exec md5sum -b {} \;
+	done
+elif [ "$check" == "1" ]
+then
+	if [[ $(find "$HOME/.lastROMCheck" -mtime +$days -print) ]]
+	then
+		md5sum -c $sumFile
+		touch $HOME/.lastROMCheck
+	fi
+fi
+
