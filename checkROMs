@@ -1,5 +1,38 @@
 #!/bin/bash
 
+function printHelp {
+	echo "Usage: checkROMs [OPTIONS]"
+	echo
+	echo "OPTIONS"
+	echo " -h|--help                         :    Display this output."
+	echo " -n|--now                          :    Check ROM's now."
+	echo " -c|--check FILENAME               :    Check checksums from the specified checksum file."
+	echo " -g|--generate FILESPEC[,FILESPEC] :    Create ROM checksums using the specified FILESPEC."
+	echo " -p|--path PATH                    :    Base path used when generating checksums."
+	echo " -d|--days NUMDAYS                 :    Number of days since last check."
+	echo
+	echo "Usage Examples"
+	echo "Generate a checksum file for ZIP files located under /home/pi."
+	echo " $0 -p /home/pi -g *.zip > checksum.md5"
+	echo
+	echo "Check generated checksum file. If a check has been performed"
+	echo "within the default 30 days or specified number of days, no check is performed."
+	echo " $0 -c checksum.md5"
+	echo
+	echo "Check generated checksum file only is 10 days has passed since it was last checked."
+	echo " $0 -c checksum.md5 -d 10"
+	echo
+	echo "Force check of generated checksum file."
+	echo " $0 -c checksum.md5 -n"
+	echo
+}
+
+if [ "$1" == "" ]
+then
+	printHelp
+	exit
+fi
+
 create=0
 check=0
 fileSpec=""
@@ -47,30 +80,7 @@ do
 			shift
 			;;
 		-h|--help)
-			echo "Usage: checkROMs [OPTIONS]"
-			echo
-			echo "OPTIONS"
-			echo " -h|--help                         :    Display this output."
-			echo " -n|--now                          :    Check ROM's now."
-			echo " -c|--check FILENAME               :    Check checksums from the specified checksum file."
-			echo " -g|--generate FILESPEC[,FILESPEC] :    Create ROM checksums using the specified FILESPEC."
-			echo " -p|--path PATH                    :    Base path used when generating checksums."
-			echo " -d|--days NUMDAYS                 :    Number of days since last check."
-			echo
-			echo "Usage Examples"
-			echo "Generate a checksum file for ZIP files located under /home/pi."
-			echo " $0 -p /home/pi -g *.zip > checksum.md5"
-			echo
-			echo "Check generated checksum file. If a check has been performed"
-			echo "within the default 30 days or specified number of days, no check is performed."
-			echo " $0 -c checksum.md5"
-			echo
-			echo "Check generated checksum file only is 10 days has passed since it was last checked."
-			echo " $0 -c checksum.md5 -d 10"
-			echo
-			echo "Force check of generated checksum file."
-			echo " $0 -c checksum.md5 -n"
-			echo
+			printHelp
 			exit
 			;;
 		*)
